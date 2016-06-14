@@ -179,7 +179,7 @@
   become: yes
 
 - name: Push chroot provision script
-  template: mode=0744 src=chroot_prov.sh dest="{{kernel_path}}/"
+  template: mode=0755 src=chroot_prov.sh dest="{{kernel_path}}/{{chroot_path}}/usr/local/bin/"
   become: yes
 
 - name: Push fstab template
@@ -199,7 +199,7 @@
   become: yes
   
 - name: Configure chroot
-  shell: "{{kernel_path}}/chroot_prov.sh {{kernel_path}}/{{chroot_path}} >> {{work_path}}/runlog"
+  shell: "chroot {{kernel_path}}/{{chroot_path}} /usr/local/bin/chroot_prov.sh  >> {{work_path}}/runlog"
   become: yes
   args:
     executable: /bin/bash
@@ -228,8 +228,13 @@
   with_items: "{{groups['cerulean_hosts']}}"
   become: yes
 
+- name: Push motd  template
+  template: mode=0644 src=motd dest="{{data_path}}/mount.{{item}}/etc/motd"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes
+  
 - name: Push sshd  template
-  template: mode=0644 src=sshd.conf dest="{{data_path}}/mount.{{item}}/etc/sshd.conf"
+  template: mode=0644 src=sshd.conf dest="{{data_path}}/mount.{{item}}/etc/ssh/sshd_config"
   with_items: "{{groups['cerulean_hosts']}}"
   become: yes
   
@@ -238,15 +243,15 @@
   with_items: "{{groups['cerulean_hosts']}}"
   become: yes
     
-#- name: Unmount luks disks
-#  shell: "umount {{data_path}}/mount.{{item}} && /sbin/cryptsetup -q luksClose '{{vm_class}}.{{item}}'"
-#  with_items: "{{groups['cerulean_hosts']}}"
-#  become: yes
-#  args:
-#    executable: /bin/bash
+- name: Unmount luks disks
+  shell: "umount {{data_path}}/mount.{{item}} && /sbin/cryptsetup -q luksClose '{{vm_class}}.{{item}}'"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes
+  args:
+    executable: /bin/bash
 
 #- name: Remove unencrypted disk encryption key if present
-#  shell: "if [ -e {{data_path}}/{{vm_gpg_real_name}}.key ];then shred -vfuz -n 2 --random-source=/dev/urandom {{data_path}}/{{vm_gpg_real_name}}.key;fi"
-#  args:
-#    executable: /bin/bash
+ #shell: "if [ -e {{data_path}}/{{vm_gpg_real_name}}.key ];then shred -vfuz -n 2 --random-source=/dev/urandom {{data_path}}/{{vm_gpg_real_name}}.key;fi"
+ #args:
+   #executable: /bin/bash
     

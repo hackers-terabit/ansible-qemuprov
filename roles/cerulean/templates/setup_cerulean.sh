@@ -5,7 +5,7 @@ qemu-img create -f {{vm_format}} '{{vm_path}}/{{vm_class}}.{{item}}.img' {{vm_si
 return $?
 }
 function shredfile {
-#shred -fuz -n 5  --random-source=/dev/urandom $1
+shred -fuz -n 5  --random-source=/dev/urandom $1
 if [ $? -ge 1 ]
 then
 exit 1

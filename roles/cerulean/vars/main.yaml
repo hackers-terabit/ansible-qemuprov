@@ -27,8 +27,8 @@ vm_tmpfs_size: "1G"
 vm_login_banner: "NO ACCESS IS AUTHORIZED TO ANYONE EXCEPT THE ADMIN OF THIS SYSTEM"
 vm_keymap: "us"
 vm_domain: "setec.astronomy"
-vm_dns_resolver_1: "4.2.2.2"
-vm_dns_resolver_2: "8.8.8.8"
+vm_dns_resolver_1: "172.16.10.250"
+vm_dns_resolver_2: "4.2.2.2"
 ##fde cryptoconfig
  #will change this var to an encrypted disk mount point later on
 vm_key_path: "/home/{{ansible_user}}/shared/"

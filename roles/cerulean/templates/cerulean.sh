@@ -1,7 +1,7 @@
 #!/bin/bash
 VM_MAC=""
 function shredfile {
-shred -fuzv -n 5  --random-source=/dev/urandom $1
+shred -fuz -n 5  --random-source=/dev/urandom $1
 if [ $? -ge 1 ]
 then
 exit 1

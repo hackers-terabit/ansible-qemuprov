@@ -2,9 +2,9 @@
 jane2
 
 [cerulean_hosts]
-#c001 host_ip=172.16.10.101 host_netmask=255.255.255.0 host_gateway=172.16.10.254 host_cidr=24
+c001 host_ip=172.16.10.101 host_netmask=255.255.255.0 host_gateway=172.16.10.254 host_cidr=24
 c002 host_ip=172.16.10.102 host_netmask=255.255.255.0 host_gateway=172.16.10.254 host_cidr=24
-#c003 host_ip=172.16.10.103 host_netmask=255.255.255.0 host_gateway=172.16.10.254 host_cidr=24
+c003 host_ip=172.16.10.103 host_netmask=255.255.255.0 host_gateway=172.16.10.254 host_cidr=24
 
 [cerulean_dependencies]
 shred
