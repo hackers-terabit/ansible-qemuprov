@@ -1,0 +1,2 @@
+config_eth0="{{hostvars[item].host_ip}} netmask {{hostvars[item].host_netmask}}"
+routes_eth0="default via {{hostvars[item].host_gateway}}"

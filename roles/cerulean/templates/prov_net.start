@@ -1,0 +1,22 @@
+#!/bin/bash
+#basic iproute2 and iptables based network provisioning script
+#once the VM is up, ansible will login and remove this after proper network/service configuration
+
+ip addr flush dev eth0 &&
+ip addr add {{hostvars[item].host_ip}}/{{hostvars[item].host_cidr}} dev eth0 &&
+ip link set eth0 up &&
+ip route add default via {{hostvars[item].host_gateway}} dev eth0&&
+ip link set dev eth0 arp on 
+
+/sbin/iptables -F && /sbin/iptables -X &&                                                                                                                                                                                                                                                    
+/sbin/iptables -P INPUT DROP &&
+/sbin/iptables -P OUTPUT DROP &&
+/sbin/iptables -P FORWARD DROP &&
+/sbin/iptables -A INPUT -i lo -j ACCEPT &&
+/sbin/iptables -A OUTPUT -o lo -j ACCEPT &&
+/sbin/iptables -A INPUT -p tcp --dport 22 -j ACCEPT &&
+/sbin/iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT &&
+/sbin/iptables -A INPUT -p icmp -j ACCEPT &&
+/sbin/iptables -A OUTPUT -p icmp -j ACCEPT
+
+echo 0 >  /proc/sys/net/ipv4/tcp_timestamps

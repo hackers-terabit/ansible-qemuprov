@@ -1,0 +1,252 @@
+---
+#- debug: var=item
+  #with_items: "{{groups['cerulean_hosts']}}"
+- name: Set remote GPG username
+  set_fact: fact_gpg_realname={{vm_gpg_real_name}}
+- name: Set remote user fact
+  set_fact: fact_remote_user={{ansible_user}}
+##install packages on the remote system
+#- name: install dependencies on the remote system
+  #package: name={{item}} state=latest
+  #with_items:"{{groups['cerulean_dependencies']}}"
+##mkdir
+- name: sudo test
+  shell: "ls /root/"
+  become: yes 
+  args:
+    executable: /bin/bash
+    
+- name: Make configuration directory
+  file: path="{{conf_path}}" state=directory recurse=yes mode=0700
+  ignore_errors: yes #error usually means the directory already exists  but can't touch gnupg/
+  
+- name: Make executable directory
+  file: path="{{exec_path}}" state=directory recurse=yes mode=0700
+  
+- name: Make data directory
+  file: path="{{data_path}}" state=directory recurse=yes mode=0700  
+  
+- name: Make VM directory
+  file: path="{{vm_path}}" state=directory recurse=yes mode=0744 owner="{{ fact_remote_user}}"
+  become: yes
+  
+- name: Make kernel directory
+  file: path="{{kernel_path}}" state=directory recurse=yes mode=0700
+
+- name: Make GPG directory
+  file: path="{{conf_path}}/gnupg" state=directory recurse=yes mode=0600
+  become: yes
+
+- name: Make temporary gentoo installation directory
+  file: path="{{kernel_path}}/{{chroot_path}}" state=directory recurse=yes mode=0600
+  become: yes
+
+- name: Make work directory
+  file: path="{{work_path}}" state=directory recurse=yes mode=0755 owner="{{ fact_remote_user}}"
+  become: yes
+    
+- name: Make VM mount point directories
+  file: path={{data_path}}/mount.{{item}} state=directory recurse=yes 
+  with_items: "{{groups['cerulean_hosts']}}"
+
+#copy over bashrc
+- name: Copy bashrc to remote server
+  template: mode=0444 src=bashrc-template dest="~/.bashrc"
+#GPG init
+- name: Push GPG keygen template
+  template: mode=0700 src=gpg-gen.conf dest="{{conf_path}}/gpg-gen.conf"
+ 
+- name: init local gpg key
+  local_action: command /bin/bash "{{inventory_dir}}/gpghelper.sh" init "{{role_path}}/files/ansible.pub"
+  
+- name: Copy remote gpg-helper
+  template: mode=0755 src=gpghelper-remote.sh dest="{{exec_path}}/gpghelper-remote.sh"
+
+- name: Copy kernel build script 
+  template: mode=0755 src=build_kernel_grsec.sh dest="{{kernel_path}}/build_kernel_grsec.sh"
+
+- name: Copy gentoo stage3 setup script
+  template: mode=0755 src=gentoo_stage3.sh dest="{{kernel_path}}/gentoo_stage3.sh"
+  
+- name: Copy kernel build script 
+  copy: src={{role_path}}/files/kernel_config dest="{{kernel_path}}/.config" mode=0700 force=yes
+
+- name: Copy ansible public key 
+  copy: src={{role_path}}/files/ansible.pub dest={{data_path}}/ansible.pub mode=0700 force=yes
+  
+- name: Initiate remote GPG keys
+  shell: "{{exec_path}}/gpghelper-remote.sh init {{data_path}}/{{vm_gpg_real_name}}.pub"
+  become: yes
+  args:
+    executable: /bin/bash
+    
+- name: Fetch remote public key
+  fetch: src="{{data_path}}/{{vm_gpg_real_name}}.pub" dest={{role_path}}/files/ verify_checksum=yes fail_on_missing=yes flat=yes
+
+- name: Delete preexisting keys for remote user,locally
+  local_action: command /bin/bash {{inventory_dir}}/gpghelper.sh delpub "{{fact_gpg_realname}}"
+  
+- name: Import remote public key
+  local_action: command /bin/bash {{inventory_dir}}/gpghelper.sh import {{role_path}}/files/{{fact_gpg_realname}}.pub
+  
+- name: Generate and encrypt remote disk encryption key
+  local_action: command /bin/bash {{inventory_dir}}/gpghelper.sh keygen {{role_path}}/files/ {{fact_gpg_realname}}
+
+- name: Copy remote disk encryption key
+  copy: src={{role_path}}/files/{{fact_gpg_realname}}.gpg dest={{data_path}}/ mode=0700 force=yes
+ 
+- name: Delete pre-existing ansible public keys remotely
+  shell: "{{exec_path}}/gpghelper-remote.sh delpub {{running_as}}"
+  become: yes
+  args:
+    executable: /bin/bash  
+    
+- name: Import ansible public key
+  shell: "{{exec_path}}/gpghelper-remote.sh import {{data_path}}/ansible.pub"
+  become: yes
+  args:
+    executable: /bin/bash
+    
+#VM script copy
+- name: Copy cerulean class VM initialization script to the remote machine
+  template: mode=0700 src=cerulean.sh dest="{{exec_path}}/{{vm_class}}.{{item}}.sh"
+  with_items: "{{groups['cerulean_hosts']}}"
+
+- name: Copy cerulean class VM provision script to the remote machine
+  template: mode=0700 src=setup_cerulean.sh dest="{{exec_path}}/setup_{{vm_class}}.{{item}}.sh"
+  with_items: "{{groups['cerulean_hosts']}}"
+    
+## VM setup
+- name: Setup remote qemu images
+  shell: "{{exec_path}}/setup_{{vm_class}}.{{item}}.sh"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes 
+  #async: 500
+  #poll: 0
+  register: vm_setup_status
+  args:
+    executable: /bin/bash
+    
+
+    
+- name: Start kernel build script
+  shell: "{{kernel_path}}/build_kernel_grsec.sh"
+  become: yes
+  #async: 200
+  #poll: 0
+  register: kernel_build_status
+  args:
+    executable: /bin/bash
+    
+
+  
+- name: Start gentoo stage3 setup script
+  shell: "{{kernel_path}}/gentoo_stage3.sh {{kernel_path}}/{{chroot_path}} >> {{work_path}}/runlog"
+  become: yes
+  #async: 200
+  #poll: 0
+  register: gentoo_build_status
+  args:
+    executable: /bin/bash
+    
+#- debug: var=item
+  #with_items: "{{vm_setup_status.results}}"
+
+
+#- name: Check and see if VM setup is finished
+  #async_status: jid={{item.ansible_job_id }}
+  #with_items: "{{vm_setup_status.results}}"
+  #register: async_res
+  #until: async_res.finished
+  
+#- name: Check on kernel build script
+  #async_status: jid={{kernel_build_status.ansible_job_id}}
+  #register: kernel_res
+  #until: kernel_res.finished
+  
+## Remove encrypted FDE gpg file and any key files if they're around(they should be removed by the scripts decrypting them)
+#- name: Remove encrypted disk encryption key
+  #shell: "shred -vfuz -n 2 --random-source=/dev/urandom {{data_path}}/{{vm_gpg_real_name}}.gpg"
+  #args:
+    #executable: /bin/bash
+- name: Mount VM disks 
+  shell: "mount /dev/mapper/{{vm_class}}.{{item}} {{data_path}}/mount.{{item}}"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes
+  
+- name: Copy locale to chroot
+  copy: src={{role_path}}/files/locale dest="{{kernel_path}}/{{chroot_path}}/etc/env.d/02locale" mode=0644 force=yes
+  become: yes
+
+- name: Push chroot provision script
+  template: mode=0744 src=chroot_prov.sh dest="{{kernel_path}}/"
+  become: yes
+
+- name: Push fstab template
+  template: mode=0644 src=fstab dest="{{kernel_path}}/{{chroot_path}}/etc/fstab"
+  become: yes
+
+- name: Push keymap template
+  template: mode=0644 src=keymap dest="{{kernel_path}}/{{chroot_path}}/etc/conf.d/keymaps"
+  become: yes
+
+- name: Push make.conf template
+  template: mode=0644 src=make.conf dest="{{kernel_path}}/{{chroot_path}}/etc/portage/make.conf"
+  become: yes
+  
+- name: Push resolv.conf template
+  template: mode=0644 src=resolv.conf dest="{{kernel_path}}/{{chroot_path}}/etc/resolv.conf"
+  become: yes
+  
+- name: Configure chroot
+  shell: "{{kernel_path}}/chroot_prov.sh {{kernel_path}}/{{chroot_path}} >> {{work_path}}/runlog"
+  become: yes
+  args:
+    executable: /bin/bash
+    
+- name: Pack stage4
+  shell: "cd {{kernel_path}}/{{chroot_path}}/ && tar  -cJf {{work_path}}/stage4.{{vm_class}}.tar.xz   *;cd .. >> {{work_path}}/runlog"
+  become: yes
+  args:
+    executable: /bin/bash
+    
+
+- name: Extract stage4 on mount points
+  shell: "cd {{data_path}}/mount.{{item}}/ && tar -xJf {{work_path}}/stage4.{{vm_class}}.tar.xz"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes
+  args:
+    executable: /bin/bash
+
+- name: Push network template
+  template: mode=0644 src=net dest="{{data_path}}/mount.{{item}}/etc/conf.d/net"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes
+
+- name: Push provisioning network script template
+  template: mode=755 src=prov_net.start dest="{{data_path}}/mount.{{item}}/etc/local.d/prov_net.start"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes
+
+- name: Push sshd  template
+  template: mode=0644 src=sshd.conf dest="{{data_path}}/mount.{{item}}/etc/sshd.conf"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes
+  
+- name: Push hostname  template
+  template: mode=0644 src=hostname dest="{{data_path}}/mount.{{item}}/etc/conf.d/hostname"
+  with_items: "{{groups['cerulean_hosts']}}"
+  become: yes
+    
+#- name: Unmount luks disks
+#  shell: "umount {{data_path}}/mount.{{item}} && /sbin/cryptsetup -q luksClose '{{vm_class}}.{{item}}'"
+#  with_items: "{{groups['cerulean_hosts']}}"
+#  become: yes
+#  args:
+#    executable: /bin/bash
+
+#- name: Remove unencrypted disk encryption key if present
+#  shell: "if [ -e {{data_path}}/{{vm_gpg_real_name}}.key ];then shred -vfuz -n 2 --random-source=/dev/urandom {{data_path}}/{{vm_gpg_real_name}}.key;fi"
+#  args:
+#    executable: /bin/bash
+    

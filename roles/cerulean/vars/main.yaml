@@ -1,0 +1,72 @@
+---
+
+##general stuff that won't fit anywhere else
+running_as: "{{ lookup('env','USER') }}-{{ lookup('env','HOSTNAME') }}"
+
+shell_path: "/bin/bash"
+conf_path: "/home/{{ansible_user}}/etc"
+exec_path: "/home/{{ansible_user}}/bin"
+data_path: "/home/{{ansible_user}}/shared"
+kernel_path: "/home/{{ansible_user}}/boot"
+chroot_path: "chrootwork"
+work_path: "/home/{{ansible_user}}/work"
+##image and fs config
+vm_format: raw
+vm_size: 20G
+vm_fs: ext4
+vm_fs_opts: "-L cerulean -F"
+
+vm_cflags: "-march=native -O2 -pipe"
+vm_use: "bindist mmx sse sse2"
+#space delimited mirror list
+vm_gentoo_mirrors: "https://lug.mtu.edu/gentoo/ https://mirror.netcologne.de/gentoo/"
+vm_gentoo_profile: "hardened/linux/amd64"
+vm_gentoo_default_root_pass: "changemeplease"
+vm_timezone: "UTC"
+vm_tmpfs_size: "1G"
+vm_login_banner: "NO ACCESS IS AUTHORIZED TO ANYONE EXCEPT THE ADMIN OF THIS SYSTEM"
+vm_keymap: "us"
+vm_domain: "setec.astronomy"
+vm_dns_resolver_1: "4.2.2.2"
+vm_dns_resolver_2: "8.8.8.8"
+##fde cryptoconfig
+ #will change this var to an encrypted disk mount point later on
+vm_key_path: "/home/{{ansible_user}}/shared/"
+vm_crypto_config: serpent-xts-benbi
+vm_keysize: 512
+vm_hash: sha1
+vm_keyfile_size: 1000
+##networkconfig
+vm_nic_model: virtio
+vm_vlan: 100
+bridge_name: br100
+tap_user: guest
+
+##qemuconfig
+
+vm_class: cerulean
+vm_path: "/crypt/ansible-managed/VM"
+vm_cpus: 4
+vm_mem: 4G
+vm_sound_hw: hda
+vm_vga: vmware
+vm_cdrom: /crypt/home/install-gentoo.iso
+vm_usbargs: "-usb -usbdevice host:0b05:5601 -usb -usbdevice host:0b05:4daf "
+vm_kernel: "/boot/kernel_grsec.4"
+vm_kernel_append: "root=/dev/sda consoleblank=0 net.ifnames=0"
+vm_kernel_initrd: "/boot/initramfs-genkernel-x86_64-4.4.8-grsec"
+
+qemu_binary: qemu-system-x86_64
+
+##gpg config
+vm_gpg_key_type: RSA
+vm_gpg_key_length: 4096
+vm_gpg_real_name: "{{ansible_user}}-{{ansible_host}}"
+vm_gpg_comment: 'Ansible managed GPG key for {{ansible_user}}@{{ansible_host}}'
+vm_gpg_email: '{{ansible_user}}@{{ansible_host}}'
+
+local_gpg_key_type: RSA
+local_gpg_key_length: 4096
+local_gpg_real_name: "{{ansible_user}}_{{ansible_host}}"
+local_gpg_comment: 'Ansible managed GPG key for {{ansible_user}}@{{ansible_host}}'
+local_gpg_email: '{{ansible_user}}@{{ansible_host}}'

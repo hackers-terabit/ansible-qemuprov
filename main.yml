@@ -1,0 +1,9 @@
+---
+
+- name: Provision qemu virtual machines
+  hosts: jane2
+  remote_user: ansibletest
+#  gather_facts: no
+  
+  roles:
+    - cerulean

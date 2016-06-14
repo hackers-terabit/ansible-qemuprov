@@ -1,0 +1,1 @@
+hostname="{{item}}.{{vm_class}}.{{vm_domain}}"
