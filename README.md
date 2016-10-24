@@ -17,9 +17,9 @@ Right now the network configuration is a bit iffy but it works fine for me, you 
 It also deploys the virtual machines with basic tools needed to secure and audit the system:
 
 - Anti-malware - clamav(unofficial signatures included)
-- System auditing - lynis acct audit sysstat aide glsa-check(for gentoo linux security advisory checking of the system)
+- System auditing - lynis checksec acct audit sysstat aide glsa-check(for gentoo linux security advisory checking of the system)
 - Rootkit and malicious file detection- rkhunter chkrootkit 
-- Network monitoring and security -  arpon    tcpdump tcpdump mtr traceroute whois
+- Network monitoring and security -  arpon tcpdump mtr traceroute whois
 - Password manager and generators -  pass passook pwgen 
 - Graphical enviornment - X11,awesome (window manager),Firefox 
 
@@ -31,7 +31,7 @@ Usage:
 
     ansible-playbook -i hosts -kK  main.yml 
 
-Add -vvv to see a more detailed output. this will take many hours as you can imagine but that's mostly there is to it.
+Add -vvv to see a more detailed output. *You will need to check line by line every variable in roles/cerulean/vars/main.yaml. This will take many hours as you can imagine but that's mostly all there is to it.
 #Todo
 
 - OSSEC (HIDS/HIPS) automated deployment and configuration
