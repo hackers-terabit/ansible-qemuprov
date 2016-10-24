@@ -1,9 +1,31 @@
 ---
 
-- name: Provision qemu virtual machines
-  hosts: jane2
+- name: Provision Cerulean class qemu virtual machines
+  hosts: kvmhost
   remote_user: ansibletest
-#  gather_facts: no
-  
   roles:
     - cerulean
+    
+#- name: Start Cerulean class virtual machines
+  #hosts: kvmhost
+  #remote_user: ansibletest
+  #vars_files:
+    #- roles/cerulean/vars/main.yaml
+  #tasks:
+  #- name: Start VMs
+    #shell: "nohup {{exec_path}}/{{vm_class}}.{{item}}.sh&"
+    #with_items: "{{groups['cerulean_hosts']}}"
+    #become: yes
+    #args:
+      #executable: /bin/bash
+
+
+#- name: Configure Cerulean class VM common services,security and packages
+  #hosts: cerulean_hosts
+  #remote_user: root
+  #roles:
+    #- cerulean_common
+  #tasks:
+  #- name: Wait for VMs to become availabe over SSH 
+    #local_action: wait_for host={{ ansible_ssh_host }} port=22    
+  #- include: roles/cerulean_common/tasks/main.yml

@@ -1,0 +1,4 @@
+#---
+
+#- name: Wait for SSH to be available 
+  #debug: var=host_ip

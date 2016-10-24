@@ -42,14 +42,14 @@ function random_mac {
 VM_MAC="ce:"$(od -An -N10 -x  /dev/random  | sha384sum | sed -r 's/^(.{10}).*$/\1/; s/([0-9a-f]{2})/\1:/g; s/:$//;'); 
 }
 function start_qemu {
-QEMU_AUDIO_DRV=alsa `which {{qemu_binary}}`  -name {{vm_class}}.{{item}}  -usbdevice tablet  -smp cpus={{vm_cpus}}  \
-  -machine accel=kvm \
+QEMU_AUDIO_DRV=alsa  `which {{qemu_binary}}`  -name {{vm_class}}.{{item}}  -usbdevice tablet  -smp cpus={{vm_cpus}}  -cpu host\
+  -machine accel=kvm -pidfile '{{data_path}}/{{vm_class}}.{{item}}.pid' \
    -drive file='/dev/mapper/{{vm_class}}.{{item}}',index=0,format=raw,if=ide,media=disk\
    -m {{vm_mem}} -soundhw {{vm_sound_hw}}  -vga {{vm_vga}}   {{vm_usbargs}} \
     -kernel {{vm_kernel}}  -append "{{vm_kernel_append}}"  -initrd {{vm_kernel_initrd}} \
-    -net nic,model={{vm_nic_model}},vlan={{vm_vlan}},macaddr=$VM_MAC  -net tap,script=no,vlan={{vm_vlan}},name={{vm_class}}.{{item}},ifname={{vm_class}}.{{item}}  
+    -net nic,model={{vm_nic_model}},vlan={{vm_vlan}},macaddr=$VM_MAC  -net tap,script=no,downscript=no,vlan={{vm_vlan}},name={{vm_class}}.{{item}},ifname={{vm_class}}.{{item}}  > {{data_path}}/{{vm_class}}.{{item}}.out
 
-
+close_luks
 }
 export GNUPGHOME="{{conf_path}}/gnupg/"
 
@@ -60,5 +60,5 @@ init_bridge
 init_host_tap
 echo "VM Network has been setup"
 start_qemu
-echo "Qemu exited."
-close_luks
+echo "Qemu forked."
+#close_luks

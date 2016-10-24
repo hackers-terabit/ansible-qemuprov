@@ -1,0 +1,54 @@
+--- a/elf/rtld.c        2016-09-18 01:09:14.957000000 +0000
++++ b/elf/rtld.c        2016-09-18 01:09:18.333000000 +0000
+@@ -1483,19 +1483,19 @@
+   struct link_map **preloads = NULL;
+   unsigned int npreloads = 0;
+ 
+-  if (__glibc_unlikely (preloadlist != NULL))
++  /*if (__glibc_unlikely (preloadlist != NULL))
+     {
+       /* The LD_PRELOAD environment variable gives list of libraries
+         separated by white space or colons that are loaded before the
+         executable's dependencies and prepended to the global scope
+         list.  If the binary is running setuid all elements
+-        containing a '/' are ignored since it is insecure.  */
++        containing a '/' are ignored since it is insecure. * / 
+       char *list = strdupa (preloadlist);
+       char *p;
+ 
+       HP_TIMING_NOW (start);
+ 
+-      /* Prevent optimizing strsep.  Speed is not important here.  */
++      /* Prevent optimizing strsep.  Speed is not important here.* /  
+       while ((p = (strsep) (&list, " :")) != NULL)
+        if (p[0] != '\0'
+            && (__builtin_expect (! __libc_enable_secure, 1)
+@@ -1506,7 +1506,7 @@
+       HP_TIMING_DIFF (diff, start, stop);
+       HP_TIMING_ACCUM_NT (load_time, diff);
+     }
+-
++*/
+   /* There usually is no ld.so.preload file, it should only be used
+      for emergencies and testing.  So the open call etc should usually
+      fail.  Using access() on a non-existing file is faster than using
+@@ -1570,16 +1570,16 @@
+            {
+              char *p;
+              runp = file;
+-             while ((p = strsep (&runp, ": \t\n")) != NULL)
++             /*while ((p = strsep (&runp, ": \t\n")) != NULL)
+                if (p[0] != '\0')
+-                 npreloads += do_preload (p, main_map, preload_file);
++                 npreloads += do_preload (p, main_map, preload_file);*/
+            }
+ 
+          if (problem != NULL)
+            {
+              char *p = strndupa (problem, file_size - (problem - file));
+ 
+-             npreloads += do_preload (p, main_map, preload_file);
++           /*  npreloads += do_preload (p, main_map, preload_file);*/
+            }
+ 
+          HP_TIMING_NOW (stop);

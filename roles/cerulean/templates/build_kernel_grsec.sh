@@ -107,7 +107,7 @@ then
   die $? "Unable to create working directory"
 fi
 cd "$WORK_DIR"
-if ! [ "$(sha512sum -c $INSTALL_DIR/kernel_grsec_latest.sha512)" ]
+if  [ "$(sha512sum -c $INSTALL_DIR/kernel_grsec_latest.sha512)" ]
 then
 echo "KERNEL_CHECKSUM_MATCH<->SKIPPING_BUILD"
 exit

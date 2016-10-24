@@ -79,7 +79,7 @@ die $? "Error extracting portage snapshot tarball"
 }
 
 
-STAGE3_PATH="$MIRROR_PATH/$AUTO_BUILD_PATH/$(curl -sS "$MIRROR_PATH/$LATEST_PATH" | grep -v '#' | awk '{print $1}')"
+STAGE3_PATH="$MIRROR_PATH/$AUTO_BUILD_PATH/$(curl -LsS "$MIRROR_PATH/$LATEST_PATH" | grep -v '#' | awk '{print $1}')"
 STAGE3_BASE=$(basename "$STAGE3_PATH")
 PORTAGE_BASE=$(basename "$PORTAGE_URL")
 ## "main"
