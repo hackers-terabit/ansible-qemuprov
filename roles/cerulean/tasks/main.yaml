@@ -214,8 +214,7 @@
   become: yes
   
 - name: Push final post provision script
-  template: mode=755 src=end_prov.sh  dest="{{kernel_path}}/{{chroot_path}}/etc/local.d/end_prov.start"
-  
+  template: src=end_prov.sh  dest="{{kernel_path}}/{{chroot_path}}/etc/local.d/end_prov.start" mode=777 force=yes
   become: yes
   
 - name: Push Lynis audit script

@@ -20,9 +20,9 @@ fi
 }
 
 function download_install_files {
-gpg --keyid-format=0xlong --keyserver hkps://pgp.mit.edu --recv  '0x13EBBDBEDE7A12775DFDB1BABB572E0E2D182910'
+gpg --keyid-format=0xlong --keyserver hkp://pgp.mit.edu --recv  '0x13EBBDBEDE7A12775DFDB1BABB572E0E2D182910'
 die $? "Error recieving gpg keys from the key server"
-gpg --keyid-format=0xlong --keyserver hkps://pgp.mit.edu --recv '0xDCD05B71EAB94199527F44ACDB6B8C1F96D8BF6D'
+gpg --keyid-format=0xlong --keyserver hkp://pgp.mit.edu --recv '0xDCD05B71EAB94199527F44ACDB6B8C1F96D8BF6D'
 die $? "Error recieving portage snapshot signing keys" 
 if ! [ -e "$STAGE3_BASE" ] 
 then

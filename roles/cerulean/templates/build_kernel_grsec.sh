@@ -32,7 +32,7 @@ die $? "Failed fetching grsec test patch"
 wget -O "$LATEST.sig" "$URL_PATCH.sig"
 die $? "Failed fetching grsec signature"
 
-gpg --keyid-format=0xlong --keyserver hkps://pgp.mit.edu --recv '0xDE9452CE46F42094907F108B44D1C0F82525FE49'
+gpg --keyid-format=0xlong --keyserver hkp://pgp.mit.edu --recv '0xDE9452CE46F42094907F108B44D1C0F82525FE49'
 die $? "Failed  Importing Grsec signing public key"
 
 gpg --verify "$LATEST.sig"  "$LATEST"
@@ -51,7 +51,7 @@ die $? "Failed fetching kernel tarball signature"
 unxz -f "linux-$KVER.tar.xz"
 die $? "Failed extracting the kernel"
 
-gpg --keyid-format=0xlong --keyserver hkps://pgp.mit.edu --recv '0x647F28654894E3BD457199BE38DBBDC86092693E'
+gpg --keyid-format=0xlong --keyserver hkp://pgp.mit.edu --recv '0x647F28654894E3BD457199BE38DBBDC86092693E'
 die $? "Failed fetching public key from a keyserver."
 
 gpg --verify "linux-$KVER.tar.sign"

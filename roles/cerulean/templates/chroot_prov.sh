@@ -24,17 +24,18 @@ useradd -d '/home/{{vm_user}}' -m '{{vm_user}}'
 gpasswd -a '{{vm_user}}' wheel
 gpasswd -a '{{vm_user}}' audio
 gpasswd -a '{{vm_user}}' video
-
-emerge -q {{vm_package_list_0}} > /dev/null &&
-emerge -q {{vm_package_list_1}} > /dev/null &&
-emerge -q {{vm_package_list_2}} > /dev/null && 
+emerge --sync
+emerge -q {{vm_package_list_0}} > /var/log/provision.log
+emerge -q {{vm_package_list_1}} > /var/log/provision.log
+emerge -q {{vm_package_list_2}} > /var/log/provision.log 
 #the following packages will be installed always too complex to handle through ansible dynamically.
-emerge -q clamav clamav-unofficial-sigs lynis acct audit rkhunter chkrootkit sysklogd gentoolkit arpon sysstat aide ntpclient pass passook tcpdump  pwgen  diffmask flaggie install-mask portpeek tcpdump mtr traceroute whois wgetpaste ntp > /dev/null
-die $? "Errors encountered while installing packages in chroot,please debug manually"
+emerge -q clamav clamav-unofficial-sigs lynis acct audit rkhunter chkrootkit sysklogd gentoolkit arpon sysstat aide ntpclient pass passook tcpdump  pwgen  diffmask flaggie install-mask portpeek tcpdump mtr traceroute whois wgetpaste ntp > /var/log/provision.log
 
 cd / && tar -xf /postprov.tar.xz 
 rm /etc/issue 
 ln -s /etc/motd /etc/issue
+paxctl -c /opt/firefox/firefox 
+paxctl -m /opt/firefox/firefox # :'(
 #this will take a while :(
 freshclam 
 
