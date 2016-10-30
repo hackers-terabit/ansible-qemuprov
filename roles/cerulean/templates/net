@@ -1,2 +1,3 @@
 config_eth0="{{hostvars[item].host_ip}} netmask {{hostvars[item].host_netmask}}"
 routes_eth0="default via {{hostvars[item].host_gateway}}"
+dns_servers_eth0="{{vm_dns_resolver_1}} {{vm_dns_resolver_2}}"

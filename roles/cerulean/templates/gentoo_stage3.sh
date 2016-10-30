@@ -20,19 +20,20 @@ fi
 }
 
 function download_install_files {
-gpg --keyid-format=0xlong --keyserver hkp://pgp.mit.edu --recv  '0x13EBBDBEDE7A12775DFDB1BABB572E0E2D182910'
+0xDE9452CE46F42094907F108B44D1C0F82525FE49
+gpg --keyid-format=0xlong --fetch 'https://pgp.mit.edu/pks/lookup?op=get&search=0x13EBBDBEDE7A12775DFDB1BABB572E0E2D182910'
 die $? "Error recieving gpg keys from the key server"
-gpg --keyid-format=0xlong --keyserver hkp://pgp.mit.edu --recv '0xDCD05B71EAB94199527F44ACDB6B8C1F96D8BF6D'
+gpg --keyid-format=0xlong --fetch 'https://pgp.mit.edu/pks/lookup?op=get&search=0xDCD05B71EAB94199527F44ACDB6B8C1F96D8BF6D'
 die $? "Error recieving portage snapshot signing keys" 
 if ! [ -e "$STAGE3_BASE" ] 
 then
-wget -O "$STAGE3_BASE" "$STAGE3_PATH"
+wget -q -O "$STAGE3_BASE" "$STAGE3_PATH"
 die $? "Error downloading stage3"
-wget -O "$STAGE3_BASE.CONTENTS" "$STAGE3_PATH.CONTENTS"
+wget -q -O "$STAGE3_BASE.CONTENTS" "$STAGE3_PATH.CONTENTS"
 die $? "Error downloading .CONTENTS file that contains a list of all files inside the stage tarball"
-wget -O "$STAGE3_BASE.DIGESTS" "$STAGE3_PATH.DIGESTS"
+wget -q -O "$STAGE3_BASE.DIGESTS" "$STAGE3_PATH.DIGESTS"
 die $? "Error downloading DIGESTS file that contains checksums of the stage file, in different algorithms"
-wget -O "$STAGE3_BASE.DIGESTS.asc" "$STAGE3_PATH.DIGESTS.asc"
+wget -q -O "$STAGE3_BASE.DIGESTS.asc" "$STAGE3_PATH.DIGESTS.asc"
 die $? "Error downloading DIGESTS.asc file that, like the .DIGESTS file, contains checksums of the stage file in different algorithms, but is also cryptographically signed to ensure it is provided by the Gentoo project"
 fi
 
@@ -46,11 +47,11 @@ sha512sum -c "$STAGE3_BASE.DIGESTS.asc.sha512"
 die $? "FATAL ERROR: stage3 tarball hash verification failed aborting immediately."
 if ! [ -e "$PORTAGE_BASE" ]
 then
-wget -O "$PORTAGE_BASE" "$PORTAGE_URL"
+wget -q -O "$PORTAGE_BASE" "$PORTAGE_URL"
 die $? "Error fetching portage tarball"
-wget -O "$PORTAGE_BASE.gpgsig" "$PORTAGE_URL.gpgsig"
+wget -q -O "$PORTAGE_BASE.gpgsig" "$PORTAGE_URL.gpgsig"
 die $? "Error fetching portage tarball gpg signature."
-wget -O "$PORTAGE_BASE.md5sum" "$PORTAGE_URL.md5sum"
+wget -q -O "$PORTAGE_BASE.md5sum" "$PORTAGE_URL.md5sum"
 die $? "Error fetching md5sum for portage tarball"
 fi
 out="$(gpg --status-fd 2  --verify $PORTAGE_BASE.gpgsig $PORTAGE_BASE 2>&1|grep 'VALID\|GOODSIG' )" &&

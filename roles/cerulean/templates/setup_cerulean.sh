@@ -50,6 +50,8 @@ return 0
 }
 
 function make_fs {
+echo "~~~~~ about to run:mkfs.{{vm_fs}} {{vm_fs_opts}} '/dev/mapper/{{vm_class}}.{{item}}'"
+
 mkfs.{{vm_fs}} {{vm_fs_opts}} '/dev/mapper/{{vm_class}}.{{item}}'
 return $?
 }

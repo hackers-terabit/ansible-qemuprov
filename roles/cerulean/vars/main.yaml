@@ -4,6 +4,8 @@
 running_as: "{{ lookup('env','USER') }}-{{ lookup('env','HOSTNAME') }}"
 
 shell_path: "/bin/bash"
+#ideally you would put this on an encrypted removable drive.
+#this is where your gpg private keys will be stored.
 conf_path: "/home/{{ansible_user}}/etc"
 exec_path: "/home/{{ansible_user}}/bin"
 data_path: "/home/{{ansible_user}}/shared"
@@ -46,9 +48,18 @@ tap_user: guest
 ##prov conf
 vm_package_list_0: "glibc htop sudo mtr rsyslog net-misc/curl"
 vm_package_list_1: "xorg-x11 awesome xf86-video-vmware xf86-input-evdev xterm xrandr eterm"
-vm_package_list_2: "app-crypt/gnupg alsa-utils alsa-oss alsa-tools alsa-core firefox-bin"
+vm_package_list_2: "app-crypt/gnupg alsa-utils alsa-oss alsa-tools firefox-bin"
 
 vm_user: "user"
+#ossec config
+vm_ossec_location: "/usr/local/bin/ossec"
+vm_ossec_syslog: "yes"
+vm_ossec_firewall_response: "y"
+vm_ossec_active_response: "y"
+vm_ossec_rootkit: "yes"
+vm_ossec_syscheck: "yes"
+vm_ossec_type: "local"
+vm_ossec_language: "en"
 
 ##qemuconfig
 

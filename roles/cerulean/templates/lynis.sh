@@ -1,6 +1,7 @@
 #!/bin/bash
 LYNIS_DOWNLOAD="https://cisofy.com/files/lynis-2.3.4.tar.gz"
 LYNIS_DOWNLOAD_SIG="https://cisofy.com/files/lynis-2.3.4.tar.gz.asc"
+LYNIS_PGP="https://pgp.mit.edu/pks/lookup?op=get&search=0x429A566FD5B79251"
 function die {
 if [ "$1" -ge 1 ]
 then
@@ -10,7 +11,7 @@ fi
 }
 
 function download_and_verify {
-gpg --keyid-format=0xlong --keyserver hkps://hkps.pool.sks-keyservers.net  --recv '0x429A566FD5B79251' > /dev/null
+gpg --fetch "$LYNIS_PGP" > /dev/null
 die $? "Error importing CISOfy signing key"
 
 wget -q -O 'lynis.tar.gz' "$LYNIS_DOWNLOAD" > /dev/null && 

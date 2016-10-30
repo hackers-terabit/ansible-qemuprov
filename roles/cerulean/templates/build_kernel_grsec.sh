@@ -27,12 +27,12 @@ then
 fi
 }
 function fetch_grsec {
-wget -O "$LATEST" "$URL_PATCH"
+wget -q -O "$LATEST" "$URL_PATCH"
 die $? "Failed fetching grsec test patch"
-wget -O "$LATEST.sig" "$URL_PATCH.sig"
+wget -q -O "$LATEST.sig" "$URL_PATCH.sig"
 die $? "Failed fetching grsec signature"
 
-gpg --keyid-format=0xlong --keyserver hkp://pgp.mit.edu --recv '0xDE9452CE46F42094907F108B44D1C0F82525FE49'
+gpg --keyid-format=0xlong --fetch 'https://pgp.mit.edu/pks/lookup?op=get&search=0xDE9452CE46F42094907F108B44D1C0F82525FE49'
 die $? "Failed  Importing Grsec signing public key"
 
 gpg --verify "$LATEST.sig"  "$LATEST"
@@ -42,16 +42,16 @@ die $? "FATAL ERROR: GPG verification of the grsec patch failed,either the downl
 }
 
 function fetch_kernel {
-wget -O "linux-$KVER.tar.xz" "$URL_KERNEL"
+wget -q -O "linux-$KVER.tar.xz" "$URL_KERNEL"
 die $? "Failed fetching kernel tarball"
 
-wget -O "linux-$KVER.tar.sign"  "$URL_KERNEL_SIGN"
+wget -q -O "linux-$KVER.tar.sign"  "$URL_KERNEL_SIGN"
 die $? "Failed fetching kernel tarball signature"
 
 unxz -f "linux-$KVER.tar.xz"
 die $? "Failed extracting the kernel"
 
-gpg --keyid-format=0xlong --keyserver hkp://pgp.mit.edu --recv '0x647F28654894E3BD457199BE38DBBDC86092693E'
+gpg --keyid-format=0xlong --fetch 'https://pgp.mit.edu/pks/lookup?op=get&search=0x647F28654894E3BD457199BE38DBBDC86092693E'
 die $? "Failed fetching public key from a keyserver."
 
 gpg --verify "linux-$KVER.tar.sign"
@@ -65,7 +65,7 @@ die $? "Error extracting the already verified kernel tarball...this is weird."
 function patch_kernel {
 
 cd "linux-$KVER"
-patch -p1 < "../$LATEST"
+patch -p1 < "../$LATEST" > /dev/null
 cd ..
 
 }
