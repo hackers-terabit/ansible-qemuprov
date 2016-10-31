@@ -260,14 +260,14 @@
     executable: /bin/bash
 
 - name: Push network template
-  template: mode=0644 src=net dest="{{data_path}}/mount.{{item}}/etc/conf.d/net"
+  template: mode=0644 src=net dest="{{data_path}}/mount.{{item}}/etc/conf.d/net.eth0"
   with_items: "{{groups['cerulean_hosts']}}"
   become: yes
 
-- name: Push provisioning network script template
-  template: mode=755 src=prov_net.start dest="{{data_path}}/mount.{{item}}/etc/local.d/prov_net.start"
-  with_items: "{{groups['cerulean_hosts']}}"
-  become: yes
+#- name: Push provisioning network script template
+  #template: mode=755 src=prov_net.start dest="{{data_path}}/mount.{{item}}/etc/local.d/prov_net.start"
+  #with_items: "{{groups['cerulean_hosts']}}"
+  #become: yes
   
 
   

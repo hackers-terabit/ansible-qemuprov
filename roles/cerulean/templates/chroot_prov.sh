@@ -1,6 +1,6 @@
 #!/bin/bash
 PROFILE=""
-MUST_HAVE="clamav clamav-unofficial-sigs lynis acct audit rkhunter chkrootkit sysklogd gentoolkit arpon sysstat aide ntpclient pass passook tcpdump  pwgen  diffmask flaggie install-mask portpeek tcpdump  traceroute whois wgetpaste ntp gradm paxtest gtk-theme-switch mrxvt geany"
+MUST_HAVE="clamav clamav-unofficial-sigs acct audit rkhunter chkrootkit sysklogd gentoolkit arpon sysstat aide ntpclient pass passook  pwgen  diffmask flaggie install-mask portpeek ntp gradm paxtest"
 
 function die {
 if [ "$1" -ge 1 ]
@@ -11,7 +11,7 @@ fi
 }
 function try_emerge {
 emerge --autounmask-write -uq $@ 2>&1 | tee /var/log/provision.log > /tmp/emergelog
-grep -q 'utounmask' /tmp/emerge4
+grep -q 'utounmask' /tmp/emergelog
 if [ $? -le 0 ]
 then
   etc-update --automode -5
@@ -60,7 +60,7 @@ paxctl -m /usr/bin/clamconf
 if [ -e '/usr/share/firefox-profile.tar.xz' ]
 then
   mkdir -p /home/{{vm_user}}/firefox-profile && cd /home/{{vm_user}}/firefox-profile
-  && tar -xf /usr/share/firefox-profile.tar.xz
+  tar -xf /usr/share/firefox-profile.tar.xz
 fi
 
 #this will take a while :(
